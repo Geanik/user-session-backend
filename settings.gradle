@@ -1,0 +1,14 @@
+rootProject.name = 'user-session-backend'
+include ':app'
+include ':dal'
+include ':logic'
+include ':domain'
+include ':graphql'
+include ':rest'
+
+project(':app').projectDir = "$rootDir/app" as File
+project(':dal').projectDir = "$rootDir/dal" as File
+project(':logic').projectDir = "$rootDir/logic" as File
+project(':domain').projectDir = "$rootDir/domain" as File
+project(':graphql').projectDir = "$rootDir/graphql" as File
+project(':rest').projectDir = "$rootDir/rest" as File
