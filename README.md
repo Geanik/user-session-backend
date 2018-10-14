@@ -1,3 +1,5 @@
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
+
 # user-session-backend
 A Spring backend that exposes a GraphQL interface that allows user-management.
 
@@ -12,11 +14,11 @@ A Spring backend that exposes a GraphQL interface that allows user-management.
 ```graphql
 query register {
     registerUser(userDto: {
-			firstName: "first",
-			lastName: "last",
-			username: "username",
-			email: "user@mail.com"
-		}, password: "pw")
+        firstName: "first",
+        lastName: "last",
+        username: "username",
+        email: "user@mail.com"
+    }, password: "pw")
 }
 ```
 
@@ -32,20 +34,20 @@ query login {
 
 ```graphql
 query updateUser {
-	updateUser(sessionToken: "0PDuouskqkS9G0mwqd4Pd", password: "pw", userDto: {
-		firstName: "newFirst",
-		username: "newuserName"
-	})
+    updateUser(sessionToken: "0PDuouskqkS9G0mwqd4Pd", password: "pw", userDto: {
+        firstName: "newFirst",
+        username: "newUsername"
+    })
 }
 ```
 
-##### find a user by id:
+##### find user by id:
 
 ```graphql
 query findUser {
-	findUserById(userId: 1) {
-		username,
-		email
-	}
+    findUserById(userId: 1) {
+        username,
+        email
+    }
 }
 ```
