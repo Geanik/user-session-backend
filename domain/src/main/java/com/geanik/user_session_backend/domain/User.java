@@ -120,10 +120,25 @@ public class User {
     }
 
     public void update(UserDto userDto) {
-        this.username = userDto.getUsername();
-        this.firstName = userDto.getFirstName();
-        this.lastName = userDto.getLastName();
-        this.email = userDto.getEmail();
+        String username = userDto.getUsername();
+        if (username != null) {
+            this.username = username;
+        }
+
+        String firstName = userDto.getFirstName();
+        if (firstName != null) {
+            this.firstName = firstName;
+        }
+
+        String lastName = userDto.getLastName();
+        if (lastName != null) {
+            this.lastName = lastName;
+        }
+
+        String email = userDto.getEmail();
+        if (email != null) {
+            this.email = email;
+        }
     }
 
 }
