@@ -173,4 +173,59 @@ public class BusinessLogicImplTest {
         assert !businessLogic.updateUser(sessionToken.getToken(), userDto1, "pw123");
     }
 
+    @Test
+    public void testOnlyUpdatesNonNullValuesForUserUpdate() {
+        Optional<String> sessionTokenString = businessLogic.registerUser(userDto1, "password");
+
+        assert sessionTokenString.isPresent();
+
+        // username set to null
+        UserDto dto = createFullUserDto();
+        String expected = dto.getUsername();
+        dto.setUsername(null);
+
+        businessLogic.updateUser(sessionTokenString.get(), dto, "password");
+        Optional<User> foundUser = repositories.users().findByEmail(dto.getEmail());
+
+        assert foundUser.isPresent();
+        assert foundUser.get().getUsername().equals(expected);
+
+        // firstName set to null
+        dto = createFullUserDto();
+        expected = dto.getFirstName();
+        dto.setFirstName(null);
+
+        businessLogic.updateUser(sessionTokenString.get(), dto, "password");
+        foundUser = repositories.users().findByEmail(dto.getEmail());
+
+        assert foundUser.isPresent();
+        assert foundUser.get().getFirstName().equals(expected);
+
+        // lastName set to null
+        dto = createFullUserDto();
+        expected = dto.getLastName();
+        dto.setLastName(null);
+
+        businessLogic.updateUser(sessionTokenString.get(), dto, "password");
+        foundUser = repositories.users().findByEmail(dto.getEmail());
+
+        assert foundUser.isPresent();
+        assert foundUser.get().getLastName().equals(expected);
+
+        // email set to null
+        // todo can not be tested right now as no search for user other than via email is possible
+        // dto = createFullUserDto();
+        // expected = dto.getEmail();
+        // dto.setEmail(null);
+        //
+        // businessLogic.updateUser(sessionTokenString.get(), dto, "password");
+        // foundUser = repositories.users().findByEmail(dto.getEmail());
+
+        //assert foundUser.isPresent();
+        // assert foundUser.get().getEmail().equals(expected);
+    }
+
+    private UserDto createFullUserDto() {
+        return new UserDto(0L,"geanik", "g", "eanik", "geanik@mail.com");
+    }
 }
