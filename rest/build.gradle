@@ -1,0 +1,7 @@
+
+description = ''
+dependencies {
+  compile project(':domain')
+  compile project(':logic')
+  compile project(':graphql')
+}

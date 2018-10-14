@@ -1,0 +1,7 @@
+
+description = ''
+dependencies {
+  compile project(':domain')
+  compile project(':dal')
+    testCompile group: 'com.h2database', name: 'h2', version:'RELEASE'
+}
