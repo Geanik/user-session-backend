@@ -1,8 +1,9 @@
 
 description = ''
 dependencies {
-  compile project(':domain')
-  compile project(':logic')
-  // https://mvnrepository.com/artifact/io.leangen.graphql/spqr
-  compile group: 'io.leangen.graphql', name: 'spqr', version: '0.9.8'
+    compile project(':domain')
+    compile project(':logic')
+
+    // https://mvnrepository.com/artifact/io.leangen.graphql/spqr
+    compile group: 'io.leangen.graphql', name: 'spqr', version: '0.9.8'
 }

@@ -1,5 +1,5 @@
 
 description = ''
 dependencies {
-  compile project(':rest')
+    compile project(':rest')
 }
