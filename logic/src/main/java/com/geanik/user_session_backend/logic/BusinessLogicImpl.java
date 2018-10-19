@@ -1,14 +1,16 @@
 package com.geanik.user_session_backend.logic;
 
-import com.geanik.user_session_backend.dal.Repositories;
-import com.geanik.user_session_backend.domain.User;
-import com.geanik.user_session_backend.domain.SessionToken;
-import com.geanik.user_session_backend.domain.dto.UserDto;
-import com.geanik.user_session_backend.logic.util.TokenManager;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import com.geanik.user_session_backend.dal.Repositories;
+import com.geanik.user_session_backend.domain.SessionToken;
+import com.geanik.user_session_backend.domain.User;
+import com.geanik.user_session_backend.domain.dto.UserDto;
+import com.geanik.user_session_backend.logic.encryption.PasswordEncryptionService;
+import com.geanik.user_session_backend.logic.util.TokenManager;
 
 //@Transactional(propagation = Propagation.REQUIRED)
 public class BusinessLogicImpl implements BusinessLogic {
@@ -33,14 +35,18 @@ public class BusinessLogicImpl implements BusinessLogic {
                 User user = userOptional.get();
 
                 // if password is correct -> generate new SessionToken
-                if (user.getPassword().equals(password)) {
-                    SessionToken sessionToken = tokenManager.generateToken(user.getId());
-                    sessionToken = repositories.sessionTokens().save(sessionToken);
+				try {
+					if (PasswordEncryptionService.verifyPassword(password, user.getPasswordHash())) {
+						SessionToken sessionToken = tokenManager.generateToken(user.getId());
+						sessionToken = repositories.sessionTokens().save(sessionToken);
 
-                    log.info("Authenticated user (email: '{}')", user.getEmail());
-                    return Optional.of(sessionToken.getToken());
-                }
-            } else
+						log.info("Authenticated user (email: '{}')", user.getEmail());
+						return Optional.of(sessionToken.getToken());
+					}
+				} catch (PasswordEncryptionService.CannotPerformOperationException | PasswordEncryptionService.InvalidHashException e) {
+					log.error("Something went wrong while hashing password for User (email: '{}')", user.getEmail());
+				}
+			} else
                 log.debug("Couldn't find User (email: '{}')", email);
         }
 
@@ -49,6 +55,9 @@ public class BusinessLogicImpl implements BusinessLogic {
 
     @Override
     public Optional<String> registerUser(UserDto userDto, String password) {
+    	if (password == null) {
+    		return Optional.empty();
+		}
 
         if (userDto != null &&
                 userDto.getUsername() != null &&
@@ -57,13 +66,19 @@ public class BusinessLogicImpl implements BusinessLogic {
                 userDto.getEmail() != null) {
 
             if (!repositories.users().findByEmail(userDto.getEmail()).isPresent()) {
-                User newUser = new User(userDto, password);
 
-                newUser = repositories.users().save(newUser);
-                log.info("Registered new User (email: '{}')", newUser.getEmail());
+            	try {
+					String passwordHash = PasswordEncryptionService.createHash(password);
+					User newUser = new User(userDto, passwordHash);
 
-                return authenticateUser(newUser.getEmail(), newUser.getPassword());
-            } else
+					newUser = repositories.users().save(newUser);
+					log.info("Registered new User (email: '{}')", newUser.getEmail());
+
+					return authenticateUser(newUser.getEmail(), password);
+				} catch (PasswordEncryptionService.CannotPerformOperationException e) {
+					log.error("Something went wrong while hashing password for User (email: '{}')", userDto.getEmail());
+				}
+			} else
                 log.debug("Email already associated to existing User (email: '{}')", userDto.getEmail());
         }
 

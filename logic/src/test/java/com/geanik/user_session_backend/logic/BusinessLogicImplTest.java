@@ -1,10 +1,10 @@
 package com.geanik.user_session_backend.logic;
 
-import com.geanik.user_session_backend.LogicConfig;
-import com.geanik.user_session_backend.dal.Repositories;
-import com.geanik.user_session_backend.domain.User;
-import com.geanik.user_session_backend.domain.SessionToken;
-import com.geanik.user_session_backend.domain.dto.UserDto;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,10 +14,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import com.geanik.user_session_backend.LogicConfig;
+import com.geanik.user_session_backend.dal.Repositories;
+import com.geanik.user_session_backend.domain.SessionToken;
+import com.geanik.user_session_backend.domain.User;
+import com.geanik.user_session_backend.domain.dto.UserDto;
 
 @SpringBootTest(classes = LogicConfig.class)
 @DataJpaTest
@@ -31,14 +32,12 @@ public class BusinessLogicImplTest {
     @Autowired
     BusinessLogic businessLogic;
 
-    private User user;
     private UserDto userDto1;
     private UserDto userDto2;
     private UserDto userDtoWithNullMember;
 
     @Before
     public void setUp() throws Exception {
-        user = new User("geanik", "g", "eanik", "geanik@mail.at", "pw123");
         userDto1 = new UserDto(0L,"geanik", "g", "eanik", "geanik@mail.com");
         userDto2 = new UserDto(0L, "herminator", "Hermann", "Maier", "h.m@mail.com");
         userDtoWithNullMember = new UserDto(0L,"pedge", "john", null, "johnny@mail.com");
@@ -46,8 +45,10 @@ public class BusinessLogicImplTest {
 
     @Test
     public void testAuthenticateUserSuccessfully() {
-        User savedUser = repositories.users().save(user);
-        assert businessLogic.authenticateUser(savedUser.getEmail(), savedUser.getPassword()).isPresent();
+        businessLogic.registerUser(userDto1, "password");
+        Optional<User> savedUser = repositories.users().findByEmail(userDto1.getEmail());
+        assert savedUser.isPresent();
+        assert businessLogic.authenticateUser(savedUser.get().getEmail(), "password").isPresent();
     }
 
     @Test
@@ -58,8 +59,10 @@ public class BusinessLogicImplTest {
 
     @Test
     public void testAuthenticateUserWithWrongPassword() {
-        User savedUser = repositories.users().save(user);
-        assert !businessLogic.authenticateUser(savedUser.getEmail(), "wrongPw").isPresent();
+        businessLogic.registerUser(userDto1, "password");
+        Optional<User> savedUser = repositories.users().findByEmail(userDto1.getEmail());
+        assert savedUser.isPresent();
+        assert !businessLogic.authenticateUser(savedUser.get().getEmail(), "wrongPw").isPresent();
     }
 
     @Test
@@ -101,16 +104,20 @@ public class BusinessLogicImplTest {
 
     @Test
     public void testFindUserByIdSuccessfully() {
-        User savedUser = repositories.users().save(user);
+        businessLogic.registerUser(userDto1, "password");
+        Optional<User> savedUser = repositories.users().findByEmail(userDto1.getEmail());
+        assert savedUser.isPresent();
 
-        Optional<UserDto> userDtoOptional = businessLogic.findUserById(savedUser.getId());
+        Optional<UserDto> userDtoOptional = businessLogic.findUserById(savedUser.get().getId());
         assert userDtoOptional.isPresent();
-        assert userDtoOptional.get().equals(new UserDto(savedUser));
+        assert userDtoOptional.get().equals(new UserDto(savedUser.get()));
     }
 
     @Test
     public void testFindUserByIdWithNotPresentId() {
-        repositories.users().save(user);
+        businessLogic.registerUser(userDto1, "password");
+        Optional<User> savedUser = repositories.users().findByEmail(userDto1.getEmail());
+        assert savedUser.isPresent();
         assert !businessLogic.findUserById(-1L).isPresent();
     }
 
