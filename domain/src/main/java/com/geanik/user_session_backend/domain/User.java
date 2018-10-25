@@ -1,12 +1,13 @@
 package com.geanik.user_session_backend.domain;
 
-import com.geanik.user_session_backend.domain.dto.UserDto;
+import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.util.Objects;
+
+import com.geanik.user_session_backend.domain.dto.UserDto;
 
 @Entity
 public class User {
@@ -19,25 +20,24 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
+    private String passwordHash;
 
     public User() {
     }
 
-    public User(String username, String firstName, String lastName, String email, String password) {
+    public User(String username, String firstName, String lastName, String email) {
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.password = password;
     }
 
-    public User(UserDto userDto, String password) {
+    public User(UserDto userDto, String passwordHash) {
         this.username = userDto.getUsername();
         this.firstName = userDto.getFirstName();
         this.lastName = userDto.getLastName();
         this.email = userDto.getEmail();
-        this.password = password;
+        this.passwordHash = passwordHash;
     }
 
     @Override
@@ -50,12 +50,12 @@ public class User {
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
                 Objects.equals(email, user.email) &&
-                Objects.equals(password, user.password);
+                Objects.equals(passwordHash, user.passwordHash);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, firstName, lastName, email, password);
+        return Objects.hash(id, username, firstName, lastName, email, passwordHash);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
+                ", password='" + passwordHash + '\'' +
                 '}';
     }
 
@@ -111,12 +111,8 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
     public void update(UserDto userDto) {
